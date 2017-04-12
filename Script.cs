@@ -1,116 +1,137 @@
-﻿public Program() {
-    // The constructor, called only once every session and
-    // always before any other method is called. Use it to
-    // initialize your script. 
-    //     
-    // The constructor is optional and can be removed if not
-    // needed.
-}
+﻿/** 
+ * Constants 
+ */ 
+const string tagScript = "[ARS]"; 
+const string tagClock = "CLOCK"; 
+const string tagRefinery = "REFINERY"; 
+const string tagAssembler = "ASSEMBLER"; 
 
-public void Save() {
-    // Called when the program needs to save its state. Use
-    // this method to save your state to the Storage field
-    // or some other means. 
-    // 
-    // This method is optional and can be removed if not
-    // needed.
-}
-
-public void Main(string argument) {
-    // The main entry point of the script, invoked every time
-    // one of the programmable block's Run actions are invoked.
-    // 
-    // The method itself is required, but the argument above
-    // can be removed if not needed.
-    /**
-     * Constants
-     */
-    const string namePanels = "BC LCD ";
-    const string nameLight = "BD LIGHT ";
-
-   /** 
-     * Variables 
-     */
-    Color colorRed = new Color(255, 0, 0);
-    Color colorYellow = new Color(205, 205, 0);
-    Color colorGreen = new Color(0, 255, 0);
-
+public void Main(string argument) { 
+ 
+    // Show Clock Time  
+    TimeSpan timeOffset = new TimeSpan(0, 0, 0, 0);        
+    DateTime currentTime = DateTime.Now;        
+    DateTime currentTimeActual = currentTime.Add(timeOffset);   
+    string timeClock = currentTimeActual.ToString("HH:mm:ss");    
+ 
+    /**  
+     * Variables texts  and color
+     */  
+    string textClock = "                                    Clock: "; 
+    string textAssembler = "---==Assembler==---"; 
+    string textRefinery = "---==Refinery==---"; 
+    Color colorRed = new Color(255, 0, 0);  
+    Color colorYellow = new Color(205, 205, 0);  
+    Color colorGreen = new Color(0, 255, 0);  
+ 
     // LCD Panels 
-    IMyTextPanel displayDL = GridTerminalSystem.GetBlockWithName( namePanels + 1 ) as IMyTextPanel;   
-    IMyTextPanel displayDR = GridTerminalSystem.GetBlockWithName( namePanels + 2 ) as IMyTextPanel;  
+    List<IMyTextPanel> lcds = new List<IMyTextPanel>();     
+    GridTerminalSystem.GetBlocksOfType<IMyTextPanel>(lcds); 
  
-    // Light 
-    IMyLightingBlock light1 = GridTerminalSystem.GetBlockWithName( nameLight + 1 ) as IMyLightingBlock;
-    IMyLightingBlock light2 = GridTerminalSystem.GetBlockWithName( nameLight + 2 ) as IMyLightingBlock;
+    // Lights 
+    List<IMyLightingBlock> lights = new List<IMyLightingBlock>();     
+    GridTerminalSystem.GetBlocksOfType<IMyLightingBlock>(lights); 
  
-    // Get All Assembler 
-    List<IMyAssembler> blocklist = new List<IMyAssembler>();  
-    GridTerminalSystem.GetBlocksOfType<IMyAssembler>(blocklist);    
- 
-    // Get All refinery 
-    List<IMyRefinery> blocklist2 = new List<IMyRefinery>();   
-    GridTerminalSystem.GetBlocksOfType<IMyRefinery>(blocklist2);    
- 
-    string textDL = "List Assembler\n---------------\n"; 
-    string textDR = "List Refinery\n---------------\n"; 
+    // Get All Assembler  
+    List<IMyAssembler> assem = new List<IMyAssembler>();   
+    GridTerminalSystem.GetBlocksOfType<IMyAssembler>(assem);     
   
-    // Look if assemblers is producing and return boolean 
-    IMyAssembler as1; 
-    bool bAss0 = false; 
-    bool bAss1 = false;
-    for ( int i = 0; i < blocklist.Count; i++) { 
-        as1 = blocklist[i]; 
-
-        if ( as1.IsProducing == true ) { 
-            bAss1 = true; 
+    // Get All refinery  
+    List<IMyRefinery> refin = new List<IMyRefinery>();    
+    GridTerminalSystem.GetBlocksOfType<IMyRefinery>(refin);     
+   
+    // Look if assemblers is producing and return boolean  
+    bool bAss0 = false;  
+    bool bAss1 = false; 
+    foreach ( IMyAssembler ass in assem ) { 
+        if ( ass.IsProducing == true ) {  
+            bAss1 = true;  
+        } else { 
+            bAss0 = true; 
+        } 
+        textAssembler += "\n" + ass.CustomName + " work: " + ass.IsProducing;  
+    }  
+  
+    // Look if refinery is producing and return boolean  
+    bool bRef0 = false; 
+    bool bRef1 = false; 
+    foreach ( IMyRefinery reff in refin ) { 
+        if ( reff.IsProducing == true ) { 
+            bRef1 = true; 
+        } else { 
+            bRef0 = true;  
         }  
-        if ( as1.IsProducing == false ) {  
-            bAss0 = true;  
-        } 
+        textRefinery += "\n" + reff.CustomName + " work: " + reff.IsProducing;   
+    }  
  
-        textDL += as1.CustomName + " work: " + as1.IsProducing + "\n"; 
-    } 
- 
-    // Look if refinery is producing and return boolean 
-    IMyRefinery ref1;
-    bool bRef0 = false;
-    bool bRef1 = false;
-    for ( int i = 0; i < blocklist2.Count; i++) {  
-        ref1 = blocklist2[i];
-
-        if ( ref1.IsProducing == true ) {
-            bRef1 = true;
-        } 
-        if ( ref1.IsProducing == false ) { 
-            bRef0 = true; 
-        } 
-  
-        textDR += ref1.CustomName + " work: " + ref1.IsProducing + "\n";  
-    } 
-
-    // Test activity Refinery and set lightColor
-    if ( bRef1 == true && bRef0 == false ) {
-        light2.SetValue("Color", colorGreen );
-    } else if (  bRef1 == true && bRef0 == true ) {
-        light2.SetValue("Color", colorYellow );
-    } else {
-        light2.SetValue("Color", colorRed );
-    }
-
-    // Test activity Assembler and set lightColor 
-    if ( bAss1 == true && bAss0 == false ) { 
-        light1.SetValue("Color", colorGreen ); 
-    } else if (  bAss1 == true && bAss0 == true ) { 
-        light1.SetValue("Color", colorYellow ); 
+    Color refineriesColor; 
+    // Test activity Refinery and set lightColor 
+    if ( bRef1 == true && bRef0 == false ) { 
+        refineriesColor = colorGreen; 
+    } else if (  bRef1 == true && bRef0 == true ) { 
+        refineriesColor = colorYellow; 
     } else { 
-        light1.SetValue("Color", colorRed ); 
-    }
+        refineriesColor = colorRed; 
+    } 
  
-    // Write text in displays 
-    displayDL.WritePublicText(textDL, false); 
-    displayDR.WritePublicText(textDR, false); 
+    Color assemblersColor; 
+    // Set color for activity Assembler  
+    if ( bAss1 == true && bAss0 == false ) {  
+        assemblersColor = colorGreen; 
+    } else if (  bAss1 == true && bAss0 == true ) {  
+        assemblersColor = colorYellow; 
+    } else {  
+        assemblersColor = colorRed; 
+    } 
  
-    // Show public text in displa 
-    displayDL.ShowPublicTextOnScreen(); 
-    displayDR.ShowPublicTextOnScreen();
+    // Set Dictorary Map for light color 
+    Dictionary<string,Color> lightModule = new Dictionary<string,Color> { 
+             {tagAssembler, assemblersColor}, {tagRefinery, refineriesColor} }; 
+ 
+    // Set Lightning color in light 
+    foreach ( IMyLightingBlock light in lights ) { 
+        // Exit if not contain tag mod 
+        string lightName = light.CustomName; 
+        if ( !lightName.Contains(tagScript) ) { 
+            continue; 
+        } 
+ 
+        string[] modules = lightName.Split(';'); 
+        Color color; 
+        // Write Text with order tag nameLCD 
+        foreach ( string module in modules ) { 
+            if ( !lightModule.TryGetValue( module.ToUpper(), out color ) ) continue; 
+            light.SetValue( "Color", color );  
+        } 
+    } 
+
+    // Write Text Clock 
+    textClock += timeClock;
+ 
+    // Set Dictorary Map for data :  Module to Text 
+    Dictionary<string,string> dataModule = new Dictionary<string,string> { {tagClock, textClock}, 
+             {tagAssembler, textAssembler}, {tagRefinery, textRefinery} }; 
+ 
+    // Set Text in all LCD panels 
+    foreach ( IMyTextPanel lcd in lcds ) { 
+        // Exit if not contain tag mod 
+        string lcdName = lcd.CustomName; 
+        if ( !lcdName.Contains(tagScript) ) { 
+            continue; 
+        } 
+         
+        string[] modules = lcdName.Split(';'); 
+        string text = ""; 
+        string outText = ""; 
+        // Write Text with order tag nameLCD 
+        foreach ( string module in modules ) { 
+            if ( !dataModule.TryGetValue( module.ToUpper(), out outText ) ) continue; 
+            text += outText + "\n"; 
+        } 
+ 
+        // Write test in displays 
+        lcd.WritePublicText(text, false); 
+        // Show public text in displays  
+        lcd.ShowPublicTextOnScreen(); 
+    } 
 }
