@@ -42,14 +42,20 @@ public void Main(string argument) {
    
     // Look if assemblers is producing and return boolean  
     bool bAss0 = false;  
-    bool bAss1 = false; 
+    bool bAss1 = false;
     foreach ( IMyAssembler ass in assem ) { 
         if ( ass.IsProducing == true ) {  
             bAss1 = true;  
         } else { 
             bAss0 = true; 
         } 
-        textAssembler += "\n" + ass.CustomName + " work: " + ass.IsProducing;  
+        textAssembler += "\n" + ass.CustomName + " work: " + ass.IsProducing;
+
+        if ( ass.IsProducing ) { 
+            ass.GetQueue( queue );
+            //IMyProductionBlock bloc = (IMyProductionBlock) ass.TryGetQueueItem(0);
+            textAssembler +=  " -> " + queue[0].BlueprintId.ToString().Split('/')[1] + ": " + ( (float) queue[0].Amount - (float) ass.CurrentProgress );
+        }
     }  
   
     // Look if refinery is producing and return boolean  
