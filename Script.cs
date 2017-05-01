@@ -61,13 +61,19 @@ public void Main(string argument) {
     // Look if refinery is producing and return boolean  
     bool bRef0 = false; 
     bool bRef1 = false; 
+    List<MyProductionItem> queueReff = new List<MyProductionItem>();
     foreach ( IMyRefinery reff in refin ) { 
         if ( reff.IsProducing == true ) { 
             bRef1 = true; 
         } else { 
             bRef0 = true;  
         }  
-        textRefinery += "\n" + reff.CustomName + " work: " + reff.IsProducing;   
+        textRefinery += "\n" + reff.CustomName + " work: " + reff.IsProducing;
+
+        if ( reff.IsProducing ) {  
+            reff.GetQueue( queueReff  ); 
+            textRefinery +=  " -> " + queueReff[0].BlueprintId.ToString().Split('/')[1] + ": " + ( (float) queueReff[0].Amount ); 
+        } 
     }  
  
     Color refineriesColor; 

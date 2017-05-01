@@ -5,8 +5,8 @@ This lightweight script allows you to display on lcd screens information on the 
 
 This script is at the beginning and for now it has only this elements:
 * Time clock
-* Display status isProducing Assembler (on/off)
-* Display status isProducing Refinery (on/off)
+* Display status isProducing Assembler (on/off) and detail information of type block and number.
+* Display status isProducing Refinery (on/off) and detail information of type block and number.
 * Change color for selected lights (linked to assembler or refinery status)
 
 This script is set to display the desired values on any lcd screen which contains this specials tag names in name LCD:
@@ -28,9 +28,6 @@ In all LCDs or Lights where do you need to see the script data (or status for li
 
 * __It's important to separate the different module by a semicolon__ ```;```
 * __In name lcd, you can call module (clock, assembler...) in lower case or upper case (it's your choice)__
-
-## Next Feactures :
-- Display information resource at working (in assembler and refinery)
 
 ## LICENSE
 
